@@ -1,0 +1,192 @@
+/* Layout */
+.import-wrap { max-width: 980px; }
+
+/* Header */
+.import-head{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.import-head h1 { margin:0; }
+.import-actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+/* Card */
+.import-card{
+  border-radius:16px;
+  padding:18px;
+  border: 1px solid rgba(128,128,128,.18);
+  background: rgba(255,255,255,.02);
+  box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 10px 25px rgba(0,0,0,.12);
+}
+
+/* Row */
+.import-row{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:14px;
+}
+@media (min-width: 900px){
+  .import-row{ grid-template-columns: 340px 1fr; align-items:start; }
+}
+
+.import-title{ font-weight:700; font-size:14px; margin-bottom:4px; }
+.import-sub{ opacity:.75; font-size:12px; }
+
+/* File picker */
+.import-file{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+
+.import-file input[type="file"]{
+  position:absolute;
+  left:-9999px;
+}
+
+.import-file-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  border: 1px solid rgba(128,128,128,.25);
+  background: rgba(255,255,255,.04);
+}
+
+.import-file-btn:hover{
+  background: rgba(255,255,255,.07);
+}
+
+.import-file-name{
+  font-size:12px;
+  padding:8px 10px;
+  border-radius:999px;
+  border: 1px dashed rgba(128,128,128,.25);
+  opacity:.75;
+}
+.import-file-name.has-file{
+  border-style:solid;
+  opacity:1;
+}
+
+/* Buttons */
+.import-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:12px;
+}
+
+.import-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:600;
+  font-size:13px;
+  border: 1px solid rgba(128,128,128,.25);
+  text-decoration:none;
+  cursor:pointer;
+}
+
+.import-btn-primary{
+  background: #2563eb; /* blue-600 */
+  border-color: rgba(37,99,235,.55);
+  color:#fff;
+}
+.import-btn-primary:hover{ background:#1d4ed8; }
+
+.import-btn-ghost{
+  background: rgba(255,255,255,.04);
+}
+.import-btn-ghost:hover{ background: rgba(255,255,255,.08); }
+
+/* Divider */
+.import-divider{
+  height:1px;
+  background: rgba(128,128,128,.25);
+  margin:16px 0;
+}
+
+/* Info grid */
+.import-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:12px;
+}
+@media (min-width: 900px){
+  .import-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.import-box{
+  border-radius:14px;
+  padding:14px;
+  border:1px solid rgba(128,128,128,.20);
+  background: rgba(255,255,255,.02);
+}
+.import-box-title{
+  font-weight:700;
+  margin-bottom:8px;
+}
+
+
+/* overlay */
+.import-overlay{
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+}
+
+.import-overlay.is-open{
+  display: flex;
+}
+
+.import-overlay-card{
+  width: min(520px, 100%);
+  border-radius: 18px;
+  padding: 20px 18px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(15, 23, 42, .92); /* dark-ish card */
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+}
+
+.import-overlay-title{
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.import-overlay-sub{
+  margin-top: 6px;
+  opacity: .85;
+  line-height: 1.35;
+  font-size: 13px;
+}
+
+/* spinner */
+.import-spinner{
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 3px solid rgba(255,255,255,.18);
+  border-top-color: rgba(255,255,255,.85);
+  animation: importSpin 0.9s linear infinite;
+}
+
+@keyframes importSpin{
+  to { transform: rotate(360deg); }
+}

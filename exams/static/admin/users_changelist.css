@@ -1,0 +1,25 @@
+/* 🔹 Butun users jadval shriftini kichraytirish */
+#result_list td {
+    font-size: 12px !important;
+    line-height: 1.3;
+}
+
+#result_list th {
+    font-size: 12px !important;
+}
+
+/* 🔹 Username biroz ajralib tursin */
+#result_list td.field-username {
+    font-size: 13px !important;
+    font-weight: 600;
+}
+
+/* 🔹 F.I.O ustuni */
+#result_list td.field-full_name {
+    font-size: 12px !important;
+}
+
+/* 🔹 Biriktirilgan testlar yanada kichikroq */
+#result_list td.field-assigned_tests {
+    font-size: 11px !important;
+}

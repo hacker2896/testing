@@ -1,0 +1,199 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/unfold_fix.css' %}">
+{% endblock %}
+{% block content %}
+<div class="max-w-4xl">
+
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight">{{ title }}</h1>
+      <p class="text-sm text-slate-400 mt-1">
+        XLSX fayldan savollarni import qiling. Type va Correct qoidalariga amal qiling.
+      </p>
+    </div>
+
+    <a href="{{ template_download_url }}"
+       class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600/90 hover:bg-emerald-600 text-white text-sm font-medium">
+      ⬇️ Template yuklab olish
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+    <!-- FORM CARD -->
+    <div class="lg:col-span-2 import-card p-5">
+      <form method="post" enctype="multipart/form-data" class="space-y-5">
+        {% csrf_token %}
+
+        <!-- HIDDEN ORIGINAL FILE INPUT (we'll control it via label) -->
+        <div class="hidden">
+          {{ form.file }}
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-200 mb-2">
+            XLSX fayl
+          </label>
+
+          <!-- DROPZONE -->
+          <label id="dropzone"
+                 for="{{ form.file.id_for_label }}"
+                 class="import-dropzone group block cursor-pointer p-6 transition">
+            <div class="flex items-center gap-4">
+              <div class="shrink-0 w-12 h-12 rounded-xl bg-white/5 ring-1 ring-white/10 flex items-center justify-center
+                          group-hover:bg-white/10 transition">
+                <span class="text-2xl">📄</span>
+              </div>
+
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-slate-100">
+                  Faylni bu yerga tashlang yoki tanlash uchun bosing
+                </div>
+                <div class="text-xs text-slate-400 mt-1">
+                  Faqat <span class="font-mono">.xlsx</span> (1 sheet, har qator = 1 savol)
+                </div>
+
+                <div id="fileName"
+                     class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white/5 ring-1 ring-white/10 text-xs text-slate-200 hidden">
+                  <span>✅</span>
+                  <span class="truncate" id="fileNameText"></span>
+                  <span class="text-slate-400" id="fileSizeText"></span>
+                </div>
+              </div>
+            </div>
+          </label>
+
+          <p class="text-[11px] text-slate-500 mt-2">
+            Maslahat: importdan oldin template’ni yuklab olib, o‘sha formatda to‘ldiring.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          {{ form.overwrite }}
+          <label for="{{ form.overwrite.id_for_label }}" class="text-sm text-slate-200">
+            Savol mavjud bo‘lsa (test+savol bo‘yicha) yangilansin
+          </label>
+        </div>
+
+        <div class="flex flex-wrap gap-2 pt-2">
+          <button type="submit"
+                  class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-medium">
+            ✅ Import qilish
+          </button>
+
+          <a href=".."
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-slate-100 text-sm font-medium">
+            ↩️ Ortga
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- HELP CARD -->
+    <div class="import-card p-5">
+      <h2 class="text-sm font-semibold text-slate-100 mb-3">Format va qoidalar</h2>
+
+      <div class="text-xs text-slate-300 space-y-3">
+        <div class="rounded-xl bg-black/20 ring-1 ring-white/10 p-3">
+          <div class="font-semibold text-slate-200 mb-1">Ustunlar tartibi</div>
+          <div class="font-mono text-[11px] leading-5 text-slate-300">
+            Test | Type | Question | Correct | Answer1 | Answer2 | Answer3 | ...
+          </div>
+        </div>
+
+        <div class="rounded-xl bg-black/20 ring-1 ring-white/10 p-3">
+          <div class="font-semibold text-slate-200 mb-2">Type qiymatlari</div>
+          <ul class="list-disc pl-4 space-y-1">
+            <li><span class="font-mono">single</span> — 1 ta to‘g‘ri javob</li>
+            <li><span class="font-mono">multiple</span> — bir nechta to‘g‘ri javob</li>
+            <li><span class="font-mono">true_false</span> — True/False</li>
+            <li><span class="font-mono">short</span> — qisqa javob (matn)</li>
+            <li><span class="font-mono">numeric</span> — sonli javob</li>
+            <li><span class="font-mono">essay</span> — esse</li>
+          </ul>
+        </div>
+
+        <div class="rounded-xl bg-black/20 ring-1 ring-white/10 p-3">
+          <div class="font-semibold text-slate-200 mb-2">Correct qoidasi</div>
+          <ul class="space-y-1">
+            <li><span class="font-mono">single</span>: <span class="font-mono">1</span></li>
+            <li><span class="font-mono">multiple</span>: <span class="font-mono">1;3;4</span> yoki <span class="font-mono">1,3,4</span></li>
+            <li><span class="font-mono">true_false</span>: <span class="font-mono">1=True</span>, <span class="font-mono">2=False</span></li>
+            <li><span class="font-mono">short/numeric</span>: to‘g‘ri javob matni/soni</li>
+            <li><span class="font-mono">essay</span>: bo‘sh bo‘lishi mumkin</li>
+          </ul>
+        </div>
+
+        <div class="text-[11px] text-slate-400">
+          Eslatma: Test topilmasa qator <b>SKIP</b> qilinadi.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  const input = document.getElementById("{{ form.file.id_for_label }}");
+  const dz = document.getElementById("dropzone");
+  const box = document.getElementById("fileName");
+  const nameEl = document.getElementById("fileNameText");
+  const sizeEl = document.getElementById("fileSizeText");
+
+  function humanSize(bytes) {
+    if (!bytes && bytes !== 0) return "";
+    const units = ["B","KB","MB","GB"];
+    let i = 0, v = bytes;
+    while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+    return " (" + v.toFixed(i === 0 ? 0 : 1) + units[i] + ")";
+  }
+
+  function setFileInfo(file) {
+    if (!file) {
+      box.classList.add("hidden");
+      return;
+    }
+    nameEl.textContent = file.name;
+    sizeEl.textContent = humanSize(file.size);
+    box.classList.remove("hidden");
+  }
+
+  input.addEventListener("change", () => {
+    const file = input.files && input.files[0];
+    setFileInfo(file);
+  });
+
+  // Drag & drop
+  ["dragenter","dragover"].forEach(evt => {
+    dz.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dz.classList.add("ring-white/30");
+      dz.classList.add("bg-white/5");
+    });
+  });
+
+  ["dragleave","drop"].forEach(evt => {
+    dz.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dz.classList.remove("ring-white/30");
+      dz.classList.remove("bg-white/5");
+    });
+  });
+
+  dz.addEventListener("drop", (e) => {
+    const files = e.dataTransfer.files;
+    if (!files || !files.length) return;
+    input.files = files;          // set input files
+    setFileInfo(files[0]);        // show filename
+  });
+})();
+</script>
+{% endblock %}

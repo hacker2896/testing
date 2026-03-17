@@ -1,0 +1,205 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'users/import_page.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="import-wrap">
+
+  <div class="import-head">
+    <div>
+      <h1>Users import (XLSX)</h1>
+      <p class="help">XLSX orqali foydalanuvchilarni ommaviy qo‘shish (username/password avtomatik yaratiladi).</p>
+    </div>
+
+    <div class="import-actions">
+      <a class="button" href="{% url 'admin:users_user_import_xlsx_sample' %}">⬇️ Sample XLSX</a>
+      <a class="button" href="{% url 'admin:users_user_changelist' %}">← Orqaga</a>
+    </div>
+  </div>
+
+  <div class="import-card">
+    <form id="importForm" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="import-row">
+        <div class="import-label">
+          <div class="import-title">XLSX faylni tanlang</div>
+          <div class="import-sub">Faqat .xlsx format. Importdan so‘ng natija fayli avtomatik yuklanadi.</div>
+        </div>
+
+        <div class="import-controls">
+          <label class="import-file">
+            <input id="import-file-input" type="file" name="file" accept=".xlsx" required>
+            <span class="import-file-btn">📁 Fayl tanlash</span>
+            <span id="import-file-name" class="import-file-name">Fayl tanlanmagan</span>
+          </label>
+
+          <div class="import-buttons">
+            <button id="importSubmitBtn" type="submit" class="import-btn import-btn-primary">
+              ✅ Import qilish
+            </button>
+            <a class="import-btn import-btn-ghost" href="{% url 'admin:users_user_changelist' %}">
+              Bekor qilish
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="import-divider"></div>
+
+      <div class="import-grid">
+        <div class="import-box">
+          <div class="import-box-title">XLSX header (ustunlar)</div>
+          <code>Ismi, Familiyasi, Otasining ismi, Filial, Bo'lim, Telefon, Email</code>
+        </div>
+
+        <div class="import-box">
+          <div class="import-box-title">Natija fayli</div>
+          <p class="help">Import tugagach natija XLSX’da <b>username</b> va <b>password</b> ham chiqadi.</p>
+          <p class="help">Status: CREATED / EXISTS / ERROR</p>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- LOADING OVERLAY -->
+<div id="importOverlay" class="import-overlay" aria-hidden="true">
+  <div class="import-overlay-card">
+    <div class="import-spinner"></div>
+    <div class="import-overlay-title">Import qilinmoqda...</div>
+    <div class="import-overlay-sub">
+      Foydalanuvchilar ko‘p bo‘lsa biroz vaqt olishi mumkin.
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const inp = document.getElementById("import-file-input");
+  const nameEl = document.getElementById("import-file-name");
+  const form = document.getElementById("importForm");
+  const overlay = document.getElementById("importOverlay");
+  const btn = document.getElementById("importSubmitBtn");
+
+  function getCookie(cookieName) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${cookieName}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+  }
+
+  function showOverlay() {
+    if (!overlay) return;
+    overlay.classList.add("active");
+    overlay.setAttribute("aria-hidden", "false");
+  }
+
+  function hideOverlay() {
+    if (!overlay) return;
+    overlay.classList.remove("active");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+
+  // Fayl nomini ko'rsatish
+  if (inp && nameEl) {
+    inp.addEventListener("change", () => {
+      const f = inp.files && inp.files[0];
+      nameEl.textContent = f ? f.name : "Fayl tanlanmagan";
+      nameEl.classList.toggle("has-file", !!f);
+    });
+  }
+
+  if (!form) return;
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    // ✅ Fayl tanlanganini tekshiramiz (fetchga bormasdan)
+    const f = inp && inp.files && inp.files[0];
+    if (!f) {
+      alert("XLSX fayl tanlanmagan.");
+      return;
+    }
+
+    // ✅ MUHIM: avval FormData olamiz (disabled bo‘lishidan oldin!)
+    const fd = new FormData(form);
+
+    // UI: loading
+    showOverlay();
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "⏳ Import qilinmoqda...";
+    }
+
+    // ⚠️ File inputni DISABLE qilmang! (u holda FormData ga kirmaydi)
+    // boshqa control'larni bloklaymiz
+    form.querySelectorAll("input, button, a").forEach(el => {
+      if (el === inp) return;       // file input qoladi
+      if (el === btn) return;       // btn o'zi disable
+      if (el.tagName === "A") el.style.pointerEvents = "none";
+      else el.disabled = true;
+    });
+
+    try {
+      const resp = await fetch(window.location.href, {
+        method: "POST",
+        body: fd,
+        credentials: "same-origin",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+      });
+
+      const ct = (resp.headers.get("Content-Type") || "").toLowerCase();
+      const cdLower = (resp.headers.get("Content-Disposition") || "").toLowerCase();
+
+      // HTML error page bo'lsa admin sahifasini chiqaramiz
+      if (!resp.ok || (!ct.includes("spreadsheetml") && !cdLower.includes("attachment"))) {
+        const html = await resp.text();
+        document.open();
+        document.write(html);
+        document.close();
+        return;
+      }
+
+      // XLSX blob
+      const blob = await resp.blob();
+
+      // filename headerdan
+      let filename = "import_result.xlsx";
+      const cdRaw = resp.headers.get("Content-Disposition");
+      if (cdRaw && cdRaw.includes("filename=")) {
+        filename = cdRaw.split("filename=")[1].replaceAll('"', "").trim();
+      }
+
+      // Download
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      // ✅ import tugagach reset + refresh
+      // (download boshlanganidan keyin)
+      setTimeout(() => window.location.reload(), 300);
+
+    } catch (err) {
+      console.error(err);
+      alert("Importda xatolik yuz berdi.");
+      window.location.reload();
+    } finally {
+      // reload bo'lmasa ham overlay yopilib qolmasin
+      // (ba'zi brauzerlar downloadda reload kechikishi mumkin)
+      setTimeout(hideOverlay, 2000);
+    }
+  });
+})();
+</script>
+{% endblock %}

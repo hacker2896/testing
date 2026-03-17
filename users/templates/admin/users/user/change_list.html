@@ -1,0 +1,18 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'users/admin_chips.css' %}">
+  <link rel="stylesheet" href="{% static 'users/admin_object_tools.css' %}">
+{% endblock %}
+
+{% block object-tools-items %}
+  {{ block.super }}
+
+    <a href="{% url 'admin:users_user_import_xlsx' %}" class="ot-import">
+      <span class="ot-plus">+</span>
+      <span>Import XLSX</span>
+    </a>
+
+{% endblock %}

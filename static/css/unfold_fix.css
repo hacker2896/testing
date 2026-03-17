@@ -1,0 +1,96 @@
+/* Force visible inputs in Unfold admin */
+
+:root {
+  --uf-bg: #0b1220;
+  --uf-border: #334155;
+  --uf-text: #e2e8f0;
+}
+
+/* Unfold ko'pincha .unfold yoki .admin-wrapper kabi konteynerlardan foydalanadi.
+   Shuning uchun hamma variantni qamrab olamiz. */
+body .unfold input,
+body .unfold textarea,
+body .unfold select,
+body .admin input,
+body .admin textarea,
+body .admin select,
+body form input,
+body form textarea,
+body form select {
+  background-color: var(--uf-bg) !important;
+  color: var(--uf-text) !important;
+  border: 1px solid var(--uf-border) !important;
+  outline: none !important;
+  padding: 8px 10px !important;
+  border-radius: 8px !important;
+  min-height: 38px !important;
+}
+
+/* Textarea balandligi */
+body .unfold textarea,
+body .admin textarea,
+body form textarea {
+  min-height: 120px !important;
+}
+
+/* Focus */
+body .unfold input:focus,
+body .unfold textarea:focus,
+body .unfold select:focus,
+body form input:focus,
+body form textarea:focus,
+body form select:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.35) !important;
+}
+
+/* Placeholder ko'rinsin */
+body .unfold input::placeholder,
+body .unfold textarea::placeholder,
+body form input::placeholder,
+body form textarea::placeholder {
+  color: rgba(226, 232, 240, 0.55) !important;
+}
+
+
+
+/* TabularInline input border fix */
+.inline-group table input,
+.inline-group table textarea,
+.inline-group table select {
+  background-color: #0b1220 !important;
+  border: 1px solid #334155 !important;
+  color: #e2e8f0 !important;
+  border-radius: 6px !important;
+}
+
+/* Focus */
+.inline-group table input:focus,
+.inline-group table textarea:focus,
+.inline-group table select:focus {
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 1px #8b5cf6 !important;
+}
+
+
+/* ===== IMPORT PAGE CARDS ===== */
+
+.import-card {
+  border: 1px solid rgba(255,255,255,.18) !important;
+  border-radius: 18px !important;
+  background: rgba(255,255,255,.05) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35) !important;
+  padding: 24px !important;
+}
+
+.import-dropzone {
+  border: 1px dashed rgba(255,255,255,.25) !important;
+  border-radius: 16px !important;
+  background: rgba(0,0,0,.25) !important;
+}
+
+.import-dropzone:hover {
+  border-color: rgba(255,255,255,.40) !important;
+  background: rgba(255,255,255,.06) !important;
+}
+
